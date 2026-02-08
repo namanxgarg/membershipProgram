@@ -5,7 +5,6 @@ import com.firstclub.membership.service.*;
 import com.firstclub.membership.manager.*;
 import com.firstclub.membership.calculator.*;
 import com.firstclub.membership.observer.*;
-import com.firstclub.membership.util.*;
 
 public class MembershipServiceFactory {
     
@@ -17,8 +16,6 @@ public class MembershipServiceFactory {
         IUserService userService = new MockUserService();
         IPaymentService paymentService = new MockPaymentService();
         
-        IDistributedLock distributedLock = new InMemoryDistributedLock();
-        
         TierChangeNotifier tierChangeNotifier = new TierChangeNotifier();
         tierChangeNotifier.addObserver(new NotificationObserver());
         tierChangeNotifier.addObserver(new AnalyticsObserver());
@@ -27,8 +24,7 @@ public class MembershipServiceFactory {
         CriteriaEvaluator criteriaEvaluator = new CriteriaEvaluator(userService);
         
         TierManager tierManager = new TierManager(
-            tierRepo, membershipRepo, criteriaEvaluator, 
-            distributedLock, tierChangeNotifier
+            tierRepo, membershipRepo, criteriaEvaluator, tierChangeNotifier
         );
         RenewalManager renewalManager = new RenewalManager(
             membershipRepo, tierManager, paymentService
@@ -36,7 +32,7 @@ public class MembershipServiceFactory {
         
         return new MembershipService(
             planRepo, tierRepo, membershipRepo, tierManager, 
-            renewalManager, userService, paymentService, distributedLock
+            renewalManager, userService, paymentService
         );
     }
 }

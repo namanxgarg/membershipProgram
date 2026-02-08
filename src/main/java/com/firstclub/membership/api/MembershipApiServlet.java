@@ -125,6 +125,19 @@ public class MembershipApiServlet extends HttpServlet {
                 membershipService.cancelMembership(userId);
                 sendResponse(resp, 200, createSuccess("Membership cancelled"));
                 
+            } else if (path.equals("/membership/upgrade-plan")) {
+                Map<String, String> request = objectMapper.readValue(body, Map.class);
+                String userId = request.get("userId");
+                String newPlanId = request.get("newPlanId");
+                
+                if (userId == null || newPlanId == null) {
+                    sendResponse(resp, 400, createError("userId and newPlanId required"));
+                    return;
+                }
+                
+                var membership = membershipService.upgradePlan(userId, newPlanId);
+                sendResponse(resp, 200, membership);
+                
             } else if (path.equals("/internal/membership/order-completed")) {
                 Map<String, Object> request = objectMapper.readValue(body, Map.class);
                 String userId = (String) request.get("userId");

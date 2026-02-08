@@ -53,9 +53,6 @@ public class RenewalManager {
         }
     }
     
-    public void processExpiredMemberships() {
-    }
-    
     public void handlePaymentFailure(String membershipId) {
         UserMembership membership = membershipRepository.findById(membershipId)
             .orElseThrow(() -> new RuntimeException("Membership not found"));

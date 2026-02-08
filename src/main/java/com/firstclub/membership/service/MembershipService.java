@@ -3,7 +3,6 @@ package com.firstclub.membership.service;
 import com.firstclub.membership.domain.*;
 import com.firstclub.membership.repository.*;
 import com.firstclub.membership.manager.*;
-import com.firstclub.membership.util.IDistributedLock;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -17,7 +16,6 @@ public class MembershipService implements IMembershipBenefitProvider {
     private RenewalManager renewalManager;
     private IUserService userService;
     private IPaymentService paymentService;
-    private IDistributedLock distributedLock;
     
     public MembershipService(IPlanRepository planRepository,
                            ITierRepository tierRepository,
@@ -25,8 +23,7 @@ public class MembershipService implements IMembershipBenefitProvider {
                            TierManager tierManager,
                            RenewalManager renewalManager,
                            IUserService userService,
-                           IPaymentService paymentService,
-                           IDistributedLock distributedLock) {
+                           IPaymentService paymentService) {
         this.planRepository = planRepository;
         this.tierRepository = tierRepository;
         this.membershipRepository = membershipRepository;
@@ -34,7 +31,6 @@ public class MembershipService implements IMembershipBenefitProvider {
         this.renewalManager = renewalManager;
         this.userService = userService;
         this.paymentService = paymentService;
-        this.distributedLock = distributedLock;
     }
     
     public List<MembershipPlan> getAvailablePlans() {
