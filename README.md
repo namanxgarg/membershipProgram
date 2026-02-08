@@ -102,13 +102,6 @@ curl "http://localhost:8080/api/internal/membership/benefits?userId=user123"
 
 **Response:** Returns tier benefits including discounts and free delivery status.
 
-#### 5. Get Tier History (Admin)
-```bash
-curl "http://localhost:8080/api/admin/membership/tier-history?userId=user123"
-```
-
-**Response:** Returns 501 (Not implemented yet)
-
 ### POST Endpoints
 
 #### 6. Subscribe to Membership
@@ -159,71 +152,6 @@ curl -X POST http://localhost:8080/api/internal/membership/order-completed \
 ```
 
 **Note:** This endpoint automatically recalculates and upgrades the user's tier based on order history.
-
-#### 9. Admin Upgrade Tier (Not Implemented)
-```bash
-curl -X POST http://localhost:8080/api/admin/membership/upgrade-tier \
-  -H "Content-Type: application/json" \
-  -d '{
-    "userId": "user123",
-    "newTierId": "tier_gold",
-    "reason": "MANUAL_UPGRADE"
-  }'
-```
-
-**Response:** Returns 501 (Not implemented yet)
-
-## Complete Test Workflow
-
-Here's a complete workflow to test all functionality:
-
-```bash
-# 1. Check available plans
-echo "=== 1. Available Plans ==="
-curl -s http://localhost:8080/api/membership/plans | jq '.'
-
-# 2. Check available tiers
-echo -e "\n=== 2. Available Tiers ==="
-curl -s http://localhost:8080/api/membership/tiers | jq 'length' && echo "tiers found"
-
-# 3. Subscribe a user
-echo -e "\n=== 3. Subscribe User ==="
-curl -s -X POST http://localhost:8080/api/membership/subscribe \
-  -H "Content-Type: application/json" \
-  -d '{"userId":"user123","planId":"plan_monthly","tierId":"tier_silver"}' | jq '.id'
-
-# 4. Check current membership
-echo -e "\n=== 4. Current Membership ==="
-curl -s "http://localhost:8080/api/membership/current?userId=user123" | jq '.present'
-
-# 5. Get membership benefits
-echo -e "\n=== 5. Membership Benefits ==="
-curl -s "http://localhost:8080/api/internal/membership/benefits?userId=user123" | jq '.tierName'
-
-# 6. Process an order (triggers tier upgrade)
-echo -e "\n=== 6. Process Order (Value: 600) ==="
-curl -s -X POST http://localhost:8080/api/internal/membership/order-completed \
-  -H "Content-Type: application/json" \
-  -d '{"userId":"user123","orderValue":600.00}' | jq '.success'
-
-# 7. Check updated membership (should be Gold tier now)
-echo -e "\n=== 7. Updated Membership (After Order) ==="
-curl -s "http://localhost:8080/api/membership/current?userId=user123" | jq 'if .present then .get.tier.id else "No membership" end'
-
-# 8. Check updated benefits
-echo -e "\n=== 8. Updated Benefits (Gold Tier) ==="
-curl -s "http://localhost:8080/api/internal/membership/benefits?userId=user123" | jq '.tierName'
-
-# 9. Cancel membership
-echo -e "\n=== 9. Cancel Membership ==="
-curl -s -X POST http://localhost:8080/api/membership/cancel \
-  -H "Content-Type: application/json" \
-  -d '{"userId":"user123"}' | jq '.success'
-
-# 10. Verify cancellation
-echo -e "\n=== 10. Verify Cancellation ==="
-curl -s "http://localhost:8080/api/membership/current?userId=user123" | jq '.present'
-```
 
 ## Tier System
 
