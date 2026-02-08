@@ -75,14 +75,6 @@ public class MembershipApiServlet extends HttpServlet {
                     return;
                 }
                 sendResponse(resp, 200, membershipService.getMembershipBenefits(userId));
-            } else if (path.startsWith("/admin/membership/tier-history")) {
-                String userId = req.getParameter("userId");
-                if (userId == null) {
-                    sendResponse(resp, 400, createError("userId parameter required"));
-                    return;
-                }
-                // TODO: Implement tier history endpoint
-                sendResponse(resp, 501, createError("Not implemented yet"));
             } else {
                 sendResponse(resp, 404, createError("Endpoint not found: " + path));
             }
@@ -150,20 +142,6 @@ public class MembershipApiServlet extends HttpServlet {
                 response.put("success", true);
                 response.put("message", "Order processed, tier recalculated");
                 sendResponse(resp, 200, response);
-                
-            } else if (path.equals("/admin/membership/upgrade-tier")) {
-                Map<String, String> request = objectMapper.readValue(body, Map.class);
-                String userId = request.get("userId");
-                String newTierId = request.get("newTierId");
-                String reason = request.getOrDefault("reason", "MANUAL_UPGRADE");
-                
-                if (userId == null || newTierId == null) {
-                    sendResponse(resp, 400, createError("userId and newTierId required"));
-                    return;
-                }
-                
-                // TODO: Implement admin upgrade
-                sendResponse(resp, 501, createError("Not implemented yet"));
                 
             } else {
                 sendResponse(resp, 404, createError("Endpoint not found: " + path));

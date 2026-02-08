@@ -58,3 +58,12 @@ CREATE TABLE IF NOT EXISTS user_memberships (
     FOREIGN KEY (plan_id) REFERENCES membership_plans(id),
     FOREIGN KEY (tier_id) REFERENCES membership_tiers(id)
 );
+
+-- User Stats Table
+CREATE TABLE IF NOT EXISTS user_stats (
+    user_id VARCHAR(50) PRIMARY KEY,
+    total_orders INT DEFAULT 0,
+    total_order_value DECIMAL(10,2) DEFAULT 0,
+    last_order_date TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);

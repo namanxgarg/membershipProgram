@@ -81,25 +81,54 @@ public class DatabaseConnection {
                 return;
             }
 
-            Scanner scanner = new Scanner(input).useDelimiter(";");
+            // Read entire script
+            Scanner scanner = new Scanner(input).useDelimiter("\\A");
+            String scriptContent = scanner.hasNext() ? scanner.next() : "";
+            scanner.close();
+            
+            // Split by semicolon (handle both with and without newlines)
+            String[] statements = scriptContent.split(";");
             Statement stmt = connection.createStatement();
+            int executedCount = 0;
 
-            while (scanner.hasNext()) {
-                String sql = scanner.next().trim();
-                if (!sql.isEmpty() && !sql.startsWith("--")) {
-                    try {
-                        stmt.execute(sql);
-                    } catch (SQLException e) {
-                        if (!e.getMessage().contains("already exists") && 
-                            !e.getMessage().contains("duplicate")) {
-                            System.err.println("SQL Error: " + e.getMessage());
-                        }
+            for (String sql : statements) {
+                sql = sql.trim();
+                // Skip empty lines and full-line comments
+                if (sql.isEmpty() || sql.matches("^\\s*$") || sql.matches("^\\s*--.*$")) {
+                    continue;
+                }
+                
+                // Remove inline comments (-- to end of line)
+                sql = sql.replaceAll("--[^\r\n]*", "").trim();
+                if (sql.isEmpty()) {
+                    continue;
+                }
+                
+                try {
+                    boolean hasResult = stmt.execute(sql);
+                    executedCount++;
+                    System.out.println("✓ Executed statement " + executedCount + " from " + scriptPath);
+                } catch (SQLException e) {
+                    String errorMsg = e.getMessage();
+                    // Ignore errors for existing objects
+                    if (errorMsg != null && 
+                        (errorMsg.contains("already exists") || 
+                         errorMsg.contains("duplicate key") ||
+                         (errorMsg.contains("constraint") && errorMsg.contains("already exists")))) {
+                        // Expected for idempotent scripts
+                        System.out.println("  (skipped - already exists)");
+                    } else {
+                        System.err.println("✗ SQL Error in " + scriptPath + ": " + errorMsg);
+                        System.err.println("  Statement: " + sql.substring(0, Math.min(200, sql.length())));
+                        e.printStackTrace();
                     }
                 }
             }
-            scanner.close();
+            stmt.close();
+            System.out.println("Script " + scriptPath + " completed - executed " + executedCount + " statements");
         } catch (Exception e) {
             System.err.println("Error executing script " + scriptPath + ": " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
